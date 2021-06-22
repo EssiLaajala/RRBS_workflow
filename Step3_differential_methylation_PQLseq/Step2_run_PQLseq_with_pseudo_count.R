@@ -2,7 +2,7 @@
 
 source("PQLseq_EL.R") # The path to the modified pqlseq function
 library(PQLseq)
-library(Matrix) # for some reason this is not covered by library(PQLseq) and function nearPD is needed if the kinship matrix is singular (in this case it isn't so this package is not necessary)
+library(Matrix) # for some reason this is not required by PQLseq but function nearPD is needed if the kinship matrix is singular (in this case it isn't so this package is not necessary)
 # Versions PQLseq_1.1 and Matrix_1.2-18
 
 #####################################
@@ -12,15 +12,23 @@ library(Matrix) # for some reason this is not covered by library(PQLseq) and fun
 ## This was written assuming there's a "covariates" matrix in addition to the "treatment" vector. I'm also assuming the covariates matrix includes some binary covariates. If it doesn't, skip the lines that check category-specific coverage and insert colnames(covariates) into covs_kept. Again, please modify this interactively. A couple gigabytes of memory is enough, and PQLseq runs within a minute or two if you set the rows_per_chunk to e.g. 100
 
 ## In this example, I'm reading in 30000 rows per job. This was run as an array job (92 independent jobs in this case, because my total number of rows is less than 92*30000 but more than 91*30000). The rows to read were identified based on the slurm task ID and rows_per_chunk (see the definition of start_idx below)
-rows_per_chunk <- 30000 # Choose this!
+rows_per_chunk <- # 30000 # Choose this!
 
 ## At each CpG a binary covariate is excluded, unless there's a minimum number of samples with the minimum coverage in each category
-min_coverage <- 10 # Choose this!
-min_nbr_samples <- 3 # Choose this!
+min_coverage <- # 10 # Choose this!
+min_nbr_samples <- # 3 # Choose this!
 
 ## Continuous covariates: character vector of column names corresponding to continuous covariates in the covariates matrix
-continuous_covs <- c("X.Intercept.", "PC1","PC2","birth.weight","gestational.weight.gain..mother", "year", "transformed_month", "BMI..mother", "height..mother", "age..mother") # Choose these!
+continuous_covs <- # c("X.Intercept.", "PC1","PC2","birth.weight","gestational.weight.gain..mother", "year", "transformed_month", "BMI..mother", "height..mother", "age..mother") # Choose these!
 ## If you don't have any continuous covariates, insert the name of the intercept column: continuous_covs <- c("X.Intercept.")
+
+# You might need to modify the "read the other inputs" section between rows 85 and 106 if your inputs have a different format (for example with respect to the presence/absence of column names)
+# My "treatment" vector was saved as a text file in this format:
+#Subject1 0
+#Subject2 1
+#Subject3 1
+# etc.
+# My "covariates" and "kinship" matrices were tab delimited text files that included column and row names
 
 #####################################
 # Read arguments 
@@ -42,7 +50,7 @@ args <- commandArgs(TRUE)
 # Read the input count matrices
 #####################################
 
-start_idx = as.numeric(args[7])*rows_per_chunk-(rows_per_chunk-1) # Varoitus! Purkkakoodia!
+start_idx = as.numeric(args[7])*rows_per_chunk-(rows_per_chunk-1)
 nlines = length(readLines(args[1]))
 if(start_idx + rows_per_chunk > nlines) rows_per_chunk = nlines - start_idx
 
@@ -123,6 +131,7 @@ if(meth_matches_total && covariates_match_total && kinship_matches_meth && treat
                 ## Run PQLseq (just for covariates chosen above)
                 tryCatch({
                 cfit[[length(cfit)+1]] = pqlseq_EL(CountData=meth[i,,drop=F], LibSize=total[i,,drop=F], Phenotypes=treatment, Covariates=covariates[,covs_kept], RelatednessMatrix=kinship, fit.maxiter=5000)
+				# If you use the original pqlseq instead of pqlseq_EL you need to specify that you are using a binomial mixed effect model (fit.model="BMM")!
                 }, error = function(e) {
                         cat("ERROR :",conditionMessage(e), "\n")
                 })

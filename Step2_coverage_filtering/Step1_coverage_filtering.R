@@ -5,20 +5,20 @@
 ###################################################################
 
 ## Load the SNP-filtered count matrices. The dimensions are number of CpG sites x number of samples
-#total <- read.table("total_prefiltered_noSNP.txt", sep="\t", header=T)
-#meth <- read.table("meth_prefiltered_noSNP.txt", sep="\t", header=T)
+total <- # read.table("total_prefiltered_noSNP.txt", sep="\t", header=T)
+meth <- # read.table("meth_prefiltered_noSNP.txt", sep="\t", header=T)
 
 # Limit for the max coverage. If you insert 0.999, it means CpG sites with coverages above the 99.9th percentile will be removed (at each sample)
-percentile <- 0.999 # Choose this number!
+percentile <- # 0.999 # Choose this number!
 
 ## Choose a coverage threshold:
-#coverage_treshold <- 10 # Choose this number!
+coverage_treshold <- # 10 # Choose this number!
 ## Choose the maximum number of samples that can have coverage below the coverage_treshold:
-#sample_treshold <- 115
+sample_treshold <- # 115
 
 ## Output file names (paths)
-#total_filename <- "total_noSNP_filtered.txt"
-#meth_filename <- "meth_noSNP_filtered.txt"
+total_filename <- # "total_noSNP_filtered.txt"
+meth_filename <- # "meth_noSNP_filtered.txt"
 
 #####################################################################################
 # Remove sites with a too great coverage (percentile 99.9, each sample separately)

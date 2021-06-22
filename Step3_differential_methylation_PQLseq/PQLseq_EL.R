@@ -8,7 +8,7 @@
 #          University of Michigan, Department of Biostatistics
 ########################################################################################################################
 
-# I have modified this such that it outputs all coefficients, standard errors and P values (for all covariates, not just for "Phenotypes"). That's a very small modification
+# I have modified this such that it outputs all coefficients, standard errors and P values (for all covariates, not just for "Phenotypes"). That's a very small modification. The modified part is between rows 135 and 168 
 # Please notice I only included the binomial mixed effect model part, not the Poisson option. If you use the original pqlseq instead, you need to specify, which model you want and bmm is not the default!
 # Works at least with R version 3.6.3 and PQLseq version 1.1.
 

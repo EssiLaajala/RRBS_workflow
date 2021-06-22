@@ -6,20 +6,33 @@
 ########################################################################
 
 # Metadata
-cov <- as.matrix(read.table("../Data/covariates_173_samples.txt", sep="\t", header=T)) # Choose this path!
-sex <- read.table("../Data/treatment_sex_173.txt", header=F) # Choose this path! Choose also a correct name for the variable (sex in this example), which was given as input vector "Phenotypes" for PQLseq
+cov <- # as.matrix(read.table("../Data/covariates_173_samples.txt", sep="\t", header=T)) # Choose this path!
+sex <- # read.table("../Data/treatment_sex_173.txt", header=F) # Choose this path! Choose also a correct name for the variable (sex in this example), which was given as input "treatment" vector ("Phenotypes") for PQLseq. Replace sex with your own variable name for this whole script.
 #     V1        V2
 #[1,] "Subject1" "0"
 #[2,] "Subject2" "1"
 #[3,] "Subject3" "1"
 # etc.
-a = sex[,2] # Careful! Hard-coded!
-names(a) = sex[,1] # Careful! Hard-coded!
-sex = a
+a <- sex[,2] # Watch out! Hard-coded!
+names(a) <- sex[,1] # Watch out! Hard-coded!
+sex <- a
 if(identical(names(sex), rownames(cov))) cov = cbind(cov, sex)
 
 # Choose the location of PQLseq output files. This assumes the working directory only contains those files and only from one analysis.
-setwd("/scratch/project_2002156/essilaaj/DIPP_cord_blood_RRBS/Vaihe4_PQLseq_173/Vaihe2_diff_meth/Tulokset/results_permuted_induced_labor_trick_3")
+#setwd("/Step3_differential_methylation_PQLseq/Results/PQLseq_full_model/") # Choose this path!
+
+meth_path <- #"/Step2_coverage_filtering/Results/meth_noSNP_filtered.txt" # Choose this path!
+total_path <- #"/Step2_coverage_filtering/Results/total_noSNP_filtered.txt" # Choose this path!
+
+autosomal_only <- # TRUE # Set this to TRUE or FALSE. If this is TRUE, only chromosomes 1-22 will be included in the analysis.
+
+# You also need to choose a few things in the beginning of part 2 (lines 119-141)
+
+###################################################################
+###################################################################
+### Part 1: combine filter sort
+###################################################################
+###################################################################
 
 ###################################################################
 # Combine outputs, pick converged
@@ -36,16 +49,16 @@ for(i in files){
 output <- as.matrix(output)
 
 output <- output[output[,1]!="NULL",]
-rownames(output) <- output[,1]
-output <- output[,-1]
+rownames(output) <- output[,1] # Watch out! Hard-coded!
+output <- output[,-1] # Watch out! Hard-coded!
 
 names_out <- as.vector(as.matrix(read.table(i, header=F, sep="\t", nrows=1)))
 colnames(output) <- names_out
 
-output_converged <- output[output[,"converged"] == " 1",]
+output_converged <- output[output[,"converged"] == " 1",] # Watch out! Hard-coded! Check table(output[,"converged"]). You might have "1" instead of " 1"
 
 # Modify this!
-colnames(output_converged) <- gsub("Phenotypes", "sex", colnames(output_converged)) # Careful! Hard-coded! Choose this!
+colnames(output_converged) <- gsub("Phenotypes", "sex", colnames(output_converged)) # Watch out! Hard-coded! Choose this!
 
 ##########################################################################
 # Load count matrices and pick CpGs for which PQLseq converged
@@ -53,9 +66,9 @@ colnames(output_converged) <- gsub("Phenotypes", "sex", colnames(output_converge
 
 # Here I also make sure the columns correspond to the rows of the design matrix (although that has been double checked in earlier steps)
 
-meth <- as.matrix(read.table("../../../../Vaihe2_filter/Tulokset/meth_noSNP_filt_173.txt", sep="\t", header=T, check.names=F))
+meth <- as.matrix(read.table(meth_path, sep="\t", header=T, check.names=F))
 meth <- meth[rownames(output_converged),rownames(cov)]
-total <- as.matrix(read.table("../../../../Vaihe2_filter/Tulokset/total_noSNP_filt_173.txt", sep="\t", header=T, check.names=F))
+total <- as.matrix(read.table(total_path, sep="\t", header=T, check.names=F))
 total <- total[rownames(output_converged),rownames(cov)]
 
 ###########################################################################
@@ -91,39 +104,44 @@ rownames(for_sorting_letter) <- letter
 for_sorting_letter <- for_sorting_letter[order(as.numeric(for_sorting_letter[,"loc"])),]
 for_sorting_letter <- for_sorting_letter[order(for_sorting_letter[,"chr"]),]
 
-# for_sorting <- rbind(for_sorting_nbr, for_sorting_letter)
 # I only kept chromosomes 1 - 22
-total <- total[rownames(for_sorting_nbr),] 
+for_sorting <- rbind(for_sorting_nbr, for_sorting_letter) 
+if(autosomal_only) for_sorting <- for_sorting_nbr
+total <- total[rownames(for_sorting),] 
 meth <- meth[rownames(total),]
 
-############################################################
-############################################################
-#### No need to re-run the lines above for each covariate
-############################################################
-############################################################
+output_converged <- output_converged[rownames(total),] # This way round because meth and total have been sorted
+
+# At this point you might want to save output_converged, meth and total (which have been sorted after picking CpGs for which PQLseq converged). They can be used to build a bed file for each covariate of interest (those that have P value columns in PQLseq output)
+
+###################################################################
+###################################################################
+### Part 2: Covariate-specific bed-file
+###################################################################
+###################################################################
+
+### No need to re-run the lines above for each covariate
 
 #####################################################
 # Choose these before you start!
 #####################################################
 
 # The covariate you want to build the bed file for (also coverage filtering will be done for that one)
-covariate <- "induced.labor" # Choose this!
-output_path <- "sorted_PQLseq_induced_labor_3.bed" # Choose this! 
+covariate <- # "induced.labor" # Choose this! Your PQLseq output should include a column name paste0("pvalue_", covariate)
+output_path <- # "sorted_induced_labor.bed" # Choose this path/filename for the bed file
 
-coverage_limit <- 10 # Choose this number!
-continuous_limit <- 0.33 # Choose this number! Minimum proportion of samples with non-missing values
-per_level_limit <- 0.33 # # Choose this number! Minimum proportion of samples with non-missing values
-per_level_limit_second <- 5 # # Minimum number of samples with non-missing values for binary covariates (because some binary variables might have only e.g. 8 samples representing one category, 33% is not enough)
+coverage_limit <- # 10 # Choose this number!
+continuous_limit <- # 0.33 # Choose this number! Minimum proportion of samples with non-missing values
+per_level_limit <- # 0.33 # Choose this number! Minimum proportion of samples with non-missing values
+per_level_limit_second <- # 5 # Minimum number of samples with non-missing values for binary covariates (because some binary variables might have only e.g. 8 samples representing one category, 33% is not enough)
 
-# Choose these!
-continuous_covs = c("birth.weight", "gestational.weight.gain..mother", "year", "transformed_month", "BMI..mother", "height..mother", "age..mother")
-binary_covs = c("class", "epidural.anaesthetic", "apgar_low", "C.section","smoking.during.pregnancy", "nbr.of.earlier.miscarriages", "insulin.treated.diabetes..mother", "induced.labor", "sex")
+# Choose these! (All continuous and binary covariates that you might want to build bed files for)
+continuous_covs # <- c("birth.weight", "gestational.weight.gain..mother", "year", "transformed_month", "BMI..mother", "height..mother", "age..mother")
+binary_covs # <- c("class", "epidural.anaesthetic", "apgar_low", "C.section","smoking.during.pregnancy", "nbr.of.earlier.miscarriages", "insulin.treated.diabetes..mother", "induced.labor", "sex")
 
 #####################################################
 # Coverage-filtering for the covariate of interest
 #####################################################
-
-output_converged <- output_converged[rownames(total),] # This way round because meth and total have been sorted
 
 if(covariate %in% continuous_covs){
         lim <- round(continuous_limit*ncol(total), digits=1)

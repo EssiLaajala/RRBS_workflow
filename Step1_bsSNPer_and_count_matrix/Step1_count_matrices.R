@@ -10,11 +10,11 @@
 ###################################################################################
 
 # Set the working directory to the location of the cov files you want to include 
-files <- list.files(pattern="merged")
+files <- # list.files(pattern="merged")
 # files is a character vector of filenames such as "Subject1.CpG_report.merged_CpG_evidence.cov"
 
 # Create a vector called sample_names. Must be in the same order and of the same length as files 
-sample_names <- sapply(files, function(z) strsplit(z, split=".CpG")[[1]][1])
+sample_names # <- sapply(files, function(z) strsplit(z, split=".CpG")[[1]][1])
 # sample_names is a character vector of IDs such as Subject1 in this example. 
 
 # Choose a minimum number of samples the CpG site should be detected in (coverage >= 1) to be included. You can save a lot of memory and time with some preliminary filtering, even though the actual coverage filtering might be done later. In my case, I know already that if some CpG site is detected in less than 10 samples, it has no way of fulilling the actual coverage criteria (applied later, not as part of this script)
@@ -25,7 +25,7 @@ path_to_write_total <- # "Step1_count_matrices/Results/total_prefiltered.txt"
 path_to_write_meth <- # "Step1_count_matrices/Results/meth_prefiltered.txt"
 
 # Do you want to sort the count matrices by chromosome and location? (TRUE/FALSE). If this is set to FALSE, they will end up in aplhabetical order.
-sort_the_matrix <- TRUE
+sort_the_matrix <- # TRUE
 # If this is set to TRUE, don't worry about the warning "NAs introduced by coercion"
 
 ###################################################################################
