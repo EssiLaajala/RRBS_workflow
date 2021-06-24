@@ -1,6 +1,6 @@
 # RRBS workflow
 
-This is an example bisulfite sequencing data analysis workflow, starting from quality control and alignment steps for .fastq files. We worked with reduced representation bisulfite sequencing (RRBS) data but most steps are applicable to WGBS as well. The anonymized RRBS data will be available in Array Express, as soon as the manuscripts are accepted for publication.
+This is an example bisulfite sequencing data analysis workflow, starting from quality control and alignment steps for .fastq files. We worked with reduced representation bisulfite sequencing (RRBS) data but most steps are applicable to WGBS as well. The anonymized RRBS data will be available in Array Express (accession code E-MTAB-10530), as soon as the manuscripts are accepted for publication.
 
 ## Usage
 
@@ -12,8 +12,7 @@ This repository is intended as:
 
 ## Citation
 
-Laajala et al. Permutation-based significance analysis reduces the type 1 error rate in bisulfite sequencing data analysis of human umbilical cord blood samples
+Laajala et al. Permutation-based significance analysis reduces the type 1 error rate in bisulfite sequencing data analysis of human umbilical cord blood samples, bioRxiv 2021.05.18.444359; doi: https://doi.org/10.1101/2021.05.18.444359
 
-Currently the paper is not yet citable but we are submitting it to bioRxiv and a peer-reviewed journal asap. Right now you can cite this repository: https://github.com/EssiLaajala/RRBS_workflow.git
 
 
