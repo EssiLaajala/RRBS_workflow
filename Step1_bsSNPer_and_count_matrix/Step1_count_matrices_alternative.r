@@ -1,7 +1,13 @@
 # Works at least with R versions between 3.6.1 and 4.0.4.
 
 # The easiest option would be to immediately filter out all measurements that are under 10 reads. However, that way we would lose information and PQLseq would converge less often. Here we keep measurements with 1-9 reads.
-# This performs the same task as Step1_count_matrices.R. This version is uglier but more efficient.
+# This performs the same task as Step1_count_matrices.R. This version is uglier but needs less memory.
+
+# Time and memory for 173 samples, on average approx. 5-6 million CpG sites detected in each sample with at least 1 read, 2-3 million with at least 10 reads
+# Memory 40G, time 3 hours 15 minutes (this version)
+# The other version (Step1_count_matrices.R) needed 80G memory, time 2 hours 45 minutes
+# These requirements also depend on the minimum_coverage and minimum_nbr_samples you choose. I used 10 and 10. I do not recommend values under 3. 
+# I tested these first interactively with just 3 samples. Five minutes with 16G was enough for that.
 
 # Input: cov files produced by coverage2cytosine (where strand information has been merged). 
 # The cov file has 6 columns: chr, start, end, methylation percentage, count methylated, count non-methylated

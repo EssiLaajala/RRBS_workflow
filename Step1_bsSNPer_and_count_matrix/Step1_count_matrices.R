@@ -1,7 +1,12 @@
 # Works at least with R versions between 3.6.1 and 4.0.4.
 
 # The easiest option would be to immediately filter out all measurements that are under 10 reads. However, that way we would lose information and PQLseq would converge less often. Here we keep measurements with 1-9 reads.
-# This script needs a lot of memory (85G was barely enough). I tested it first interactively with just 3 samples, 16G was enough for that
+
+# Time and memory for 173 samples, on average approx. 5-6 million CpG sites detected in each sample with at least 1 read, 2-3 million with at least 10 reads
+# Memory 80G, time 2 hours 45 minutes (this version)
+# The other version (Step1_count_matrices_alternative.R) needed 40G memory, time 3 hours 15 minutes 
+# These requirements also depend on the minimum_nbr_samples you choose. I used value 10.
+# I tested these first interactively with just 3 samples. Five minutes with 16G was enough for that.
 
 # Input: cov files produced by coverage2cytosine (where strand information has been merged). 
 # The cov file has 6 columns: chr, start, end, methylation percentage, count methylated, count non-methylated
@@ -19,7 +24,7 @@ sample_names <- # sapply(files, function(z) strsplit(z, split=".CpG")[[1]][1])
 # sample_names is a character vector of IDs such as Subject1 in this example. 
 
 # Choose a minimum number of samples the CpG site should be detected in (coverage >= 1) to be included. You can save a lot of memory and time with some preliminary filtering, even though the actual coverage filtering might be done later. In my case, I know already that if some CpG site is detected in less than 10 samples, it has no way of fulfilling the actual coverage criteria (applied later, not as part of this script)
-limit <- # 10 ##Choose this number! Must be an integer between 2 and length(files)
+minimum_nbr_samples <- # 10 ##Choose this number! Must be an integer between 2 and length(files)
 
 # Add filenames to write to (as characters). Full paths or paths from the working directory.
 path_to_write_total <- # "Step1_count_matrices/Results/total_prefiltered.txt"
@@ -67,8 +72,8 @@ for(i in 1:length(lista)) all_sites <- c(all_sites, rownames(lista[[i]]))
 a <- duplicated(all_sites) # This is done first because all_sites is a huge vector and the next step (table) would take too long. Function "duplicated" was 57 times faster than the next step (function "table") in my toy data of 3 samples and 17 million sites
 non_unique <- all_sites[a]
 b <- table(non_unique)
-# Pick CpG sites that are detected (coverage >= 1) in at least some number of samples (the number you inserted in limit):
-frequent_sites <- names(b[b>=(limit-1)]) #limit-1 because duplicated already removed one of each
+# Pick CpG sites that are detected (coverage >= 1) in at least some number of samples (the number you inserted in minimum_nbr_samples):
+frequent_sites <- names(b[b>=(minimum_nbr_samples-1)]) #minimum_nbr_samples-1 because duplicated already removed one of each
 
 # Filter each matrix (include only frequent_sites):
 for(i in 1:length(lista)) lista[[i]] <- lista[[i]][intersect(rownames(lista[[i]]), frequent_sites),]
